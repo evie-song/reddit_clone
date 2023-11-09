@@ -10,24 +10,37 @@ using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using reddit_clone.Configurations;
 using Microsoft.Extensions.Options;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using System.Text;
+using Microsoft.IdentityModel.Tokens;
 
 var  MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
 var builder = WebApplication.CreateBuilder(args);
 
-
 // Add services to the container.
 builder.Services.AddDbContext<DataContext>(options => 
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// builder.Services.Configure<JwtConfig>(builder.Configuration.GetSection(key:"JwtConfig"));
+builder.Services.Configure<JwtConfig>(builder.Configuration.GetSection(key:"JwtConfig"));
 
-// builder.Services.AddAuthentication(configureOptions:options => {
-//     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-//     options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-//     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+builder.Services.AddAuthentication(configureOptions:options => {
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(jwt => {
+    var key = Encoding.ASCII.GetBytes(builder.Configuration.GetSection(key:"JwtConfig:Secret").Value);
 
-// });
+    jwt.SaveToken = true;
+    jwt.TokenValidationParameters = new TokenValidationParameters() {
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKey = new SymmetricSecurityKey(key),
+        ValidateIssuer = false, // for dev
+        ValidateAudience = false, // for dev
+        RequireExpirationTime = false, // for dev
+        ValidateLifetime = true
+    };
+});
 
 builder.Services.AddCors(options =>
 {
@@ -60,6 +73,8 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseCors(MyAllowSpecificOrigins);
+
+app.UseAuthentication();
 
 app.UseAuthorization();
 
