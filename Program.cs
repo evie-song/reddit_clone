@@ -12,6 +12,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.AspNetCore.Identity;
 
 var  MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
@@ -41,6 +42,9 @@ builder.Services.AddAuthentication(configureOptions:options => {
         ValidateLifetime = true
     };
 });
+
+builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedEmail = false)
+    .AddEntityFrameworkStores<DataContext>();
 
 builder.Services.AddCors(options =>
 {
