@@ -14,6 +14,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.VisualBasic;
 using reddit_clone.Configurations;
+using reddit_clone.Data;
 using reddit_clone_backend.Dtos.Authentication;
 using reddit_clone_backend.Models;
 
@@ -26,14 +27,16 @@ namespace reddit_clone_backend.Controllers
     public class AuthenticationController : ControllerBase
     {
         private readonly UserManager<IdentityUser> _userManager;
+        private readonly DataContext _context;
         private readonly IConfiguration _configuration;
         // private readonly JwtConfig _jwtConfig;
         public AuthenticationController(
+            DataContext context,
             UserManager<IdentityUser> userManager,
             IConfiguration configuration
             // JwtConfig jwtConfig
         )
-        {   
+        {   _context = context;
             _userManager = userManager;
             _configuration = configuration;
             // _jwtConfig = jwtConfig;
@@ -65,13 +68,17 @@ namespace reddit_clone_backend.Controllers
                 var is_created = await _userManager.CreateAsync(new_user, request.Password);
 
                 if (is_created.Succeeded) {
-                    // generate token
+                    var new_application_user = new ApplicationUser() {
+                        Id = new_user.Id
+                    };
+                    _context.ApplicationUsers.Add(new_application_user);
+                    await _context.SaveChangesAsync();
                     var token = GenerateGwtToken(new_user);
                     return Ok(new AuthResult(){
                         Result = true,
                         Token = token
                     });
-
+                    // generate token
                 };
 
                 return BadRequest(new AuthResult(){
@@ -84,7 +91,7 @@ namespace reddit_clone_backend.Controllers
             }
             return BadRequest();
         }
-
+ 
 
         [Route("Login")]
         [HttpPost]
@@ -113,7 +120,10 @@ namespace reddit_clone_backend.Controllers
                 var jwtToken = GenerateGwtToken(existing_user);
                 return Ok(new AuthResult(){
                     Token = jwtToken,
-                    Result = true
+                    Result = true,
+                    Username = existing_user.UserName,
+                    Email = existing_user.Email,
+                    UserId = existing_user.Id
                 });
             }
 

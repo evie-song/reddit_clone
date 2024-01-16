@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using reddit_clone.Data;
@@ -11,9 +12,11 @@ using reddit_clone.Data;
 namespace reddit_clone.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20240114180820_AddApplicationUserToPost")]
+    partial class AddApplicationUserToPost
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -300,21 +303,6 @@ namespace reddit_clone.Migrations
                     b.ToTable("ApplicationUsers");
                 });
 
-            modelBuilder.Entity("reddit_clone_backend.Models.SavedPost", b =>
-                {
-                    b.Property<string>("ApplicationUserId")
-                        .HasColumnType("text");
-
-                    b.Property<int>("PostId")
-                        .HasColumnType("integer");
-
-                    b.HasKey("ApplicationUserId", "PostId");
-
-                    b.HasIndex("PostId");
-
-                    b.ToTable("SavedPosts");
-                });
-
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -388,40 +376,14 @@ namespace reddit_clone.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("reddit_clone_backend.Models.SavedPost", b =>
-                {
-                    b.HasOne("reddit_clone_backend.Models.ApplicationUser", "ApplicationUser")
-                        .WithMany("SavedPosts")
-                        .HasForeignKey("ApplicationUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("reddit_clone.Models.Post", "Post")
-                        .WithMany("SavedPosts")
-                        .HasForeignKey("PostId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("ApplicationUser");
-
-                    b.Navigation("Post");
-                });
-
             modelBuilder.Entity("reddit_clone.Models.Community", b =>
                 {
                     b.Navigation("Posts");
                 });
 
-            modelBuilder.Entity("reddit_clone.Models.Post", b =>
-                {
-                    b.Navigation("SavedPosts");
-                });
-
             modelBuilder.Entity("reddit_clone_backend.Models.ApplicationUser", b =>
                 {
                     b.Navigation("Posts");
-
-                    b.Navigation("SavedPosts");
                 });
 #pragma warning restore 612, 618
         }

@@ -4,6 +4,8 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using reddit_clone.Data;
+using Microsoft.AspNetCore.Identity;
+
 
 namespace reddit_clone.Services.PostService
 {
@@ -12,19 +14,22 @@ namespace reddit_clone.Services.PostService
 
         private readonly IMapper _mapper;
         private readonly DataContext _context;
+        private readonly UserManager<IdentityUser> _userManager;
 
-        public PostService(IMapper mapper, DataContext context)
+        public PostService(IMapper mapper, DataContext context, UserManager<IdentityUser> userManager)
         {
             _context = context;
             _mapper = mapper;
+            _userManager = userManager;
         }
 
         public async Task<ServiceResponse<List<GetPostDto>>> AddPost(AddPostDto newPost)
         {
             var servicesResponse = new ServiceResponse<List<GetPostDto>>();
-
             var post = _mapper.Map<Post>(newPost);
             var community = await _context.Communities.FindAsync(newPost.CommunityId);
+            var user = await _userManager.FindByIdAsync(newPost.UserId);
+            post.User = user;
             post.Community = community;
             _context.Posts.Add(post);
             await _context.SaveChangesAsync();
@@ -86,11 +91,27 @@ namespace reddit_clone.Services.PostService
             var servicesResponse = new ServiceResponse<List<GetPostDto>>();
             var posts = await _context.Posts
                 .Include(p => p.Community)
+                .Include(p => p.User)
                 .Select(p => new GetPostDto(p))
                 .ToListAsync();
             servicesResponse.Data = posts.OrderBy(post => post.Id).ToList();
             return servicesResponse;
         }
+
+        // need to update below code. 
+        public async Task<ServiceResponse<List<GetPostDto>>> GetByUser(string userId) {
+            var servicesResponse = new ServiceResponse<List<GetPostDto>>();
+            var posts = await _context.Posts
+                .Select(p => new GetPostDto(
+                    p,
+                    _context.SavedPosts.Any(sp => sp.PostId == p.Id && sp.ApplicationUserId == userId)
+                ))
+                .ToListAsync();
+            servicesResponse.Data = posts.OrderBy(post => post.Id).ToList();
+            return servicesResponse;
+        }
+
+
 
         public async Task<ServiceResponse<GetPostDto>> GetPostById(int id)
         {   
