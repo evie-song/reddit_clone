@@ -26,6 +26,30 @@ namespace reddit_clone_backend.Controllers
             _context = context;
         }
 
+        [HttpDelete]
+        public async Task<ActionResult<List<SavedPost>>> DeleteSavedPost (AddSavedPostDto request) 
+        {
+            try {
+                var savedPost = await _context.SavedPosts.FindAsync(request.ApplicationUserId, request.PostId);
+                if (savedPost is null) 
+                    throw new Exception("Saved post is not found");
+                
+                _context.SavedPosts.Remove(savedPost);
+
+                await _context.SaveChangesAsync();
+
+                var savedPosts = await _context.SavedPosts
+                    .Where(sp => sp.ApplicationUserId == request.ApplicationUserId)
+                    .ToListAsync();
+
+                return Ok(savedPosts);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = "An error occurred during the deletion.", error = ex.Message });
+            }
+        }
+
         [HttpPost]
         public async Task<ActionResult<List<SavedPost>>> AddSavedPost (AddSavedPostDto request)
         {
@@ -35,7 +59,10 @@ namespace reddit_clone_backend.Controllers
             }; 
             _context.SavedPosts.Add(newSavedPost);
             await _context.SaveChangesAsync();
-            return Ok(await _context.SavedPosts.ToListAsync());
+            var savedPosts = await _context.SavedPosts
+                .Where(sp => sp.ApplicationUserId == request.ApplicationUserId)
+                .ToListAsync();
+            return Ok(savedPosts);
         }
 
         [HttpGet("{userId}")]

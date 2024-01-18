@@ -102,6 +102,8 @@ namespace reddit_clone.Services.PostService
         public async Task<ServiceResponse<List<GetPostDto>>> GetByUser(string userId) {
             var servicesResponse = new ServiceResponse<List<GetPostDto>>();
             var posts = await _context.Posts
+                .Include(p => p.Community)
+                .Include(p => p.User)
                 .Select(p => new GetPostDto(
                     p,
                     _context.SavedPosts.Any(sp => sp.PostId == p.Id && sp.ApplicationUserId == userId)

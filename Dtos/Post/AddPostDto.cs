@@ -13,6 +13,7 @@ namespace reddit_clone.Dtos.Post
         public int? DownVote {get; set;} = 0;
         public int? CommunityId {get; set;}
         public string? UserId {get; set;}
+        public string? ApplicationUserId { get; set;}
 
     }
 }
