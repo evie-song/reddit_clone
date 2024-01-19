@@ -76,6 +76,8 @@ namespace reddit_clone_backend.Controllers
             var postIds = savedPosts.Select(sp => sp.PostId).ToList();
             Console.WriteLine($"Post IDs: {string.Join(", ", postIds)}");
             var posts = await _context.Posts
+                .Include(p => p.Community )
+                .Include(p => p.User )
                 .Where(p => postIds.Contains(p.Id))
                 .Select(p => new GetPostDto(p))
                 .ToListAsync();
