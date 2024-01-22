@@ -19,6 +19,8 @@ namespace reddit_clone.Data
         public DbSet<Post> Posts => Set<Post>();
         public DbSet<Community> Communities => Set<Community>();
         public DbSet<SavedPost> SavedPosts => Set<SavedPost>();
+        public DbSet<VoteRegistration> VoteRegistrations => Set<VoteRegistration>();
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -43,7 +45,18 @@ namespace reddit_clone.Data
                 .WithMany(p => p.SavedPosts)
                 .HasForeignKey(sp => sp.PostId);
 
+            modelBuilder.Entity<VoteRegistration>()
+                .HasKey(vr => new { vr.ApplicationUserId, vr.PostId });
 
+            modelBuilder.Entity<VoteRegistration>()
+                .HasOne(vr => vr.ApplicationUser)
+                .WithMany(au => au.VoteRegistrations)
+            .HasForeignKey(vr => vr.ApplicationUserId);
+
+            modelBuilder.Entity<VoteRegistration>()
+                .HasOne(vr => vr.Post)
+                .WithMany(p => p.VoteRegistrations)
+                .HasForeignKey(vr => vr.PostId);
 
         //     modelBuilder.Entity<Community>()
         //         .HasMany(a => a.Posts)

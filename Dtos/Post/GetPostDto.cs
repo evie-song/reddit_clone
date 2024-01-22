@@ -21,13 +21,13 @@ namespace reddit_clone.Dtos.Post
         public string? Username {get; set;}
         public bool IsSaved { get; set; } = false;
         
-        public GetPostDto(Models.Post post, bool isSaved){
+        public GetPostDto(Models.Post post, bool isSaved, int upVoteCount, int downVoteCount){
             Id = post.Id;
             Title = post.Title;
             Content = post.Content;
             CreatedTime = post.CreatedTime;
-            UpVote = post.UpVote;
-            DownVote = post.DownVote;
+            UpVote = upVoteCount;
+            DownVote = downVoteCount;
             CommunityId = post.CommunityId;
             CommunityName = post.Community != null ? post.Community.Title : "not found";
             Username = post.User != null? post.User.UserName : "not found";

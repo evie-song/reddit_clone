@@ -5,6 +5,7 @@ using System.Linq.Expressions;
 using System.Threading.Tasks;
 using reddit_clone.Data;
 using Microsoft.AspNetCore.Identity;
+using reddit_clone_backend.Models;
 
 
 namespace reddit_clone.Services.PostService
@@ -43,9 +44,9 @@ namespace reddit_clone.Services.PostService
         async public Task<ServiceResponse<GetPostDto>> DecreaseVoteByOne(int id)
         {
             var servicesResponse = new ServiceResponse<GetPostDto>();
-            try 
+            try
             {
-                var post = await _context.Posts.FirstOrDefaultAsync(p => p.Id == id );
+                var post = await _context.Posts.FirstOrDefaultAsync(p => p.Id == id);
                 if (post is null)
                     throw new Exception($"Charactor with Id `{id}` not found");
                 post.DownVote += 1;
@@ -54,7 +55,9 @@ namespace reddit_clone.Services.PostService
                 // servicesResponse.Data = _mapper.Map<GetPostDto>(post);
                 servicesResponse.Data = new GetPostDto(post);
 
-            } catch(Exception ex) {
+            }
+            catch (Exception ex)
+            {
                 servicesResponse.Success = false;
                 servicesResponse.Message = ex.Message;
             }
@@ -79,7 +82,7 @@ namespace reddit_clone.Services.PostService
                 servicesResponse.Data = _context.Posts.Select(p => _mapper.Map<GetPostDto>(p)).ToList();
             }
             catch (Exception ex)
-            {   
+            {
                 servicesResponse.Success = false;
                 servicesResponse.Message = ex.Message;
             }
@@ -87,26 +90,33 @@ namespace reddit_clone.Services.PostService
         }
 
         public async Task<ServiceResponse<List<GetPostDto>>> GetAllPost()
-        {   
-            var servicesResponse = new ServiceResponse<List<GetPostDto>>();
-            var posts = await _context.Posts
-                .Include(p => p.Community)
-                .Include(p => p.User)
-                .Select(p => new GetPostDto(p))
-                .ToListAsync();
-            servicesResponse.Data = posts.OrderBy(post => post.Id).ToList();
-            return servicesResponse;
-        }
-
-        // need to update below code. 
-        public async Task<ServiceResponse<List<GetPostDto>>> GetByUser(string userId) {
+        {
             var servicesResponse = new ServiceResponse<List<GetPostDto>>();
             var posts = await _context.Posts
                 .Include(p => p.Community)
                 .Include(p => p.User)
                 .Select(p => new GetPostDto(
                     p,
-                    _context.SavedPosts.Any(sp => sp.PostId == p.Id && sp.ApplicationUserId == userId)
+                    false,
+                    _context.VoteRegistrations.Count(vr => vr.PostId == p.Id && vr.VoteValue == VoteEnum.UpVote),
+                    _context.VoteRegistrations.Count(vr => vr.PostId == p.Id && vr.VoteValue == VoteEnum.DownVote)
+                ))
+                .ToListAsync();
+            servicesResponse.Data = posts.OrderBy(post => post.Id).ToList();
+            return servicesResponse;
+        }
+
+        public async Task<ServiceResponse<List<GetPostDto>>> GetByUser(string userId)
+        {
+            var servicesResponse = new ServiceResponse<List<GetPostDto>>();
+            var posts = await _context.Posts
+                .Include(p => p.Community)
+                .Include(p => p.User)
+                .Select(p => new GetPostDto(
+                    p,
+                    _context.SavedPosts.Any(sp => sp.PostId == p.Id && sp.ApplicationUserId == userId),
+                    _context.VoteRegistrations.Count(vr => vr.PostId == p.Id && vr.VoteValue == VoteEnum.UpVote),
+                    _context.VoteRegistrations.Count(vr => vr.PostId == p.Id && vr.VoteValue == VoteEnum.DownVote)
                 ))
                 .ToListAsync();
             servicesResponse.Data = posts.OrderBy(post => post.Id).ToList();
@@ -116,20 +126,21 @@ namespace reddit_clone.Services.PostService
 
 
         public async Task<ServiceResponse<GetPostDto>> GetPostById(int id)
-        {   
+        {
             var servicesResponse = new ServiceResponse<GetPostDto>();
             var dbPost = await _context.Posts
                 .Include(p => p.Community)
-                .FirstOrDefaultAsync(p => p.Id == id );
+                .FirstOrDefaultAsync(p => p.Id == id);
             servicesResponse.Data = _mapper.Map<GetPostDto>(dbPost);
             return servicesResponse;
         }
 
-        public async Task<ServiceResponse<GetPostDto>> IncreaseVoteByOne(int id) {
+        public async Task<ServiceResponse<GetPostDto>> IncreaseVoteByOne(int id)
+        {
             var servicesResponse = new ServiceResponse<GetPostDto>();
-            try 
+            try
             {
-                var post = await _context.Posts.FirstOrDefaultAsync(p => p.Id == id );
+                var post = await _context.Posts.FirstOrDefaultAsync(p => p.Id == id);
                 if (post is null)
                     throw new Exception($"Charactor with Id `{id}` not found");
                 post.UpVote += 1;
@@ -137,7 +148,9 @@ namespace reddit_clone.Services.PostService
 
                 servicesResponse.Data = _mapper.Map<GetPostDto>(post);
 
-            } catch(Exception ex) {
+            }
+            catch (Exception ex)
+            {
                 servicesResponse.Success = false;
                 servicesResponse.Message = ex.Message;
             }
@@ -151,7 +164,7 @@ namespace reddit_clone.Services.PostService
 
             try
             {
-                var post = await _context.Posts.FindAsync(updatePost.Id );
+                var post = await _context.Posts.FindAsync(updatePost.Id);
 
                 if (post is null)
                     throw new Exception($"Charactor with Id `{updatePost.Id}` not found");
@@ -164,7 +177,7 @@ namespace reddit_clone.Services.PostService
                 servicesResponse.Data = _mapper.Map<GetPostDto>(post);
             }
             catch (Exception ex)
-            {   
+            {
                 servicesResponse.Success = false;
                 servicesResponse.Message = ex.Message;
             }

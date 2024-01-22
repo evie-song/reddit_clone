@@ -13,6 +13,8 @@ namespace reddit_clone_backend.Models
         public string? LastName { get; set; }
         public List<Post>? Posts { get; set; }
         public List<SavedPost> SavedPosts { get; set; }
+        public List<VoteRegistration> VoteRegistrations { get; set; }
+
         
     }
 }

@@ -4,9 +4,10 @@ using System.Linq;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 
+
 namespace reddit_clone_backend.Models
 {
-    public class SavedPost
+    public class VoteRegistration
     {
         public string ApplicationUserId { get; set; }
         [JsonIgnore]
@@ -14,9 +15,12 @@ namespace reddit_clone_backend.Models
         public int PostId { get; set; }
         [JsonIgnore]
         public Post Post { get; set; }
+        public VoteEnum VoteValue { get; set; }
     }
 
-
-
-
+        public enum VoteEnum
+    {
+        UpVote = 1,
+        DownVote = -1
+    }
 }
