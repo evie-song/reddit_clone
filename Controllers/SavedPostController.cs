@@ -65,24 +65,7 @@ namespace reddit_clone_backend.Controllers
             return Ok(savedPosts);
         }
 
-        [HttpGet("{userId}")]
-        public async Task<ActionResult<List<GetPostDto>>> GetPerUser (string userId) {
-            Console.WriteLine($"User ID: {userId}");
-
-            var savedPosts = await _context.SavedPosts 
-                .Where(sp => sp.ApplicationUserId == userId)
-                .ToListAsync();
-            Console.WriteLine($"Saved Post IDs: {string.Join(", ", savedPosts.Select(sp => sp.PostId))}");
-            var postIds = savedPosts.Select(sp => sp.PostId).ToList();
-            Console.WriteLine($"Post IDs: {string.Join(", ", postIds)}");
-            var posts = await _context.Posts
-                .Include(p => p.Community )
-                .Include(p => p.User )
-                .Where(p => postIds.Contains(p.Id))
-                .Select(p => new GetPostDto(p))
-                .ToListAsync();
-            return Ok(posts);
-        }
+        
 
     }
 }

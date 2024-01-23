@@ -37,6 +37,12 @@ namespace reddit_clone.Controllers
             return Ok(await _postService.GetPostById(id));
         }
 
+        [HttpGet("{id}/{userId}")]
+        public async Task<ActionResult<ServiceResponse<GetPostDto>>> GetSingleByIdPerUser(int id, string userId) {
+
+            return Ok(await _postService.GetPostByIdPerUser(id, userId));
+        }
+
         [HttpPost]
         public async Task<ActionResult<ServiceResponse<List<GetPostDto>>>> AddPost(AddPostDto newPost)
         {

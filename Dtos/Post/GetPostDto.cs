@@ -14,6 +14,8 @@ namespace reddit_clone.Dtos.Post
         public string? Title {get; set;}
         public string? Content {get; set;}
         public DateTime CreatedTime { get; private set; }
+        public bool upVoted {get; set; } = false;
+        public bool downVoted {get; set; } = false;
         public int? UpVote {get; set;}
         public int? DownVote {get; set;}
         public int? CommunityId {get; set;}
@@ -32,6 +34,21 @@ namespace reddit_clone.Dtos.Post
             CommunityName = post.Community != null ? post.Community.Title : "not found";
             Username = post.User != null? post.User.UserName : "not found";
             IsSaved = isSaved;
+        }
+
+        public GetPostDto(Models.Post post, bool isSaved, int upVoteCount, int downVoteCount, bool hasUpVoted, bool hasDownVoted){
+            Id = post.Id;
+            Title = post.Title;
+            Content = post.Content;
+            CreatedTime = post.CreatedTime;
+            UpVote = upVoteCount;
+            DownVote = downVoteCount;
+            CommunityId = post.CommunityId;
+            CommunityName = post.Community != null ? post.Community.Title : "not found";
+            Username = post.User != null? post.User.UserName : "not found";
+            IsSaved = isSaved;
+            upVoted = hasUpVoted;
+            downVoted = hasDownVoted;
         }
 
         public GetPostDto(Models.Post post){
