@@ -101,11 +101,6 @@ namespace reddit_clone_backend.Controllers
             return Ok(posts);
         }
 
-
-        // [HttpGet("")]
-
-
-
         // public IActionResult Index()
         // {
         //     return View();

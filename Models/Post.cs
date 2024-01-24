@@ -24,6 +24,7 @@ namespace reddit_clone.Models
         public ApplicationUser? ApplicationUser { get;  set; }
         public List<SavedPost> SavedPosts { get; set; }
         public List<VoteRegistration> VoteRegistrations { get; set; }
+        public List<Comment> Comments {get; set; }
 
         public Post() {
             CreatedTime = DateTime.Now;
@@ -31,3 +32,4 @@ namespace reddit_clone.Models
 
     }
 }
+

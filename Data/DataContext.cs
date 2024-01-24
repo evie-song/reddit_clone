@@ -13,13 +13,14 @@ namespace reddit_clone.Data
     {
         public DataContext(DbContextOptions<DataContext> options) : base(options)
         {
-            
+
         }
         public DbSet<ApplicationUser> ApplicationUsers => Set<ApplicationUser>();
         public DbSet<Post> Posts => Set<Post>();
         public DbSet<Community> Communities => Set<Community>();
         public DbSet<SavedPost> SavedPosts => Set<SavedPost>();
         public DbSet<VoteRegistration> VoteRegistrations => Set<VoteRegistration>();
+        public DbSet<Comment> Comments => Set<Comment>();
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -30,7 +31,7 @@ namespace reddit_clone.Data
                 .HasOne(p => p.User)
                 .WithMany()
                 .HasForeignKey(p => p.UserId)
-                .OnDelete(DeleteBehavior.Cascade); 
+                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<SavedPost>()
                 .HasKey(sp => new { sp.ApplicationUserId, sp.PostId });
@@ -58,16 +59,26 @@ namespace reddit_clone.Data
                 .WithMany(p => p.VoteRegistrations)
                 .HasForeignKey(vr => vr.PostId);
 
-        //     modelBuilder.Entity<Community>()
-        //         .HasMany(a => a.Posts)
-        //         .WithOne(b => b.Community)
-        //         .HasForeignKey(b => b.CommunityId);
+            modelBuilder.Entity<Comment>()
+                .HasOne(c => c.Post)
+                .WithMany(p => p.Comments)
+                .HasForeignKey(c => c.PostId);
+            
+            modelBuilder.Entity<Comment>()
+                .HasOne(c => c.BaseComment)
+                .WithMany(c => c.ChildComments)
+                .HasForeignKey(c => c.BaseCommentId);
 
-        //     modelBuilder.Entity<Post>()
-        //         .HasOne(b => b.Community)
-        //         .WithMany(a => a.Posts)
-        //         .HasForeignKey(b => b.CommunityId);
-        // }
+            //     modelBuilder.Entity<Community>()
+            //         .HasMany(a => a.Posts)
+            //         .WithOne(b => b.Community)
+            //         .HasForeignKey(b => b.CommunityId);
+
+            //     modelBuilder.Entity<Post>()
+            //         .HasOne(b => b.Community)
+            //         .WithMany(a => a.Posts)
+            //         .HasForeignKey(b => b.CommunityId);
+            // }
         }
     }
 }
