@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using reddit_clone.Models;
+using reddit_clone_backend.Dtos.Comment;
+using reddit_clone_backend.Models;
 using static reddit_clone.Models.Community;
 
 namespace reddit_clone.Dtos.Post
@@ -14,41 +16,47 @@ namespace reddit_clone.Dtos.Post
         public string? Title {get; set;}
         public string? Content {get; set;}
         public DateTime CreatedTime { get; private set; }
-        public bool upVoted {get; set; } = false;
-        public bool downVoted {get; set; } = false;
+        public bool UpVoted {get; set; } = false;
+        public bool DownVoted {get; set; } = false;
         public int? UpVote {get; set;}
         public int? DownVote {get; set;}
         public int? CommunityId {get; set;}
         public string? CommunityName {get; set;}
         public string? Username {get; set;}
         public bool IsSaved { get; set; } = false;
+        public int CommentCount { get; set; } = 0;
+        public List<GetCommentDto> Comments { get; set; } = new List<GetCommentDto>();
         
-        public GetPostDto(Models.Post post, bool isSaved, int upVoteCount, int downVoteCount){
-            Id = post.Id;
-            Title = post.Title;
-            Content = post.Content;
-            CreatedTime = post.CreatedTime;
-            UpVote = upVoteCount;
-            DownVote = downVoteCount;
-            CommunityId = post.CommunityId;
-            CommunityName = post.Community != null ? post.Community.Title : "not found";
-            Username = post.User != null? post.User.UserName : "not found";
-            IsSaved = isSaved;
-        }
+        // public GetPostDto(Models.Post post, bool isSaved){
+        //     Id = post.Id;
+        //     Title = post.Title;
+        //     Content = post.Content;
+        //     CreatedTime = post.CreatedTime;
+        //     UpVote = post.VoteRegistrations.Where(vr => vr.VoteValue == VoteEnum.UpVote).Count();
+        //     DownVote = post.VoteRegistrations.Where(vr => vr.VoteValue == VoteEnum.DownVote).Count();
+        //     CommunityId = post.CommunityId;
+        //     CommunityName = post.Community != null ? post.Community.Title : "not found";
+        //     Username = post.User != null? post.User.UserName : "not found";
+        //     IsSaved = isSaved;
+        //     CommentCount = post.Comments.Count();
+        //     Comments = post.Comments != null ? post.Comments.Select(c => new GetCommentDto(c)).ToList() : new List<GetCommentDto>();
+        // }
 
-        public GetPostDto(Models.Post post, bool isSaved, int upVoteCount, int downVoteCount, bool hasUpVoted, bool hasDownVoted){
+        public GetPostDto(Models.Post post, bool isSaved, bool hasUpVoted, bool hasDownVoted){
             Id = post.Id;
             Title = post.Title;
             Content = post.Content;
             CreatedTime = post.CreatedTime;
-            UpVote = upVoteCount;
-            DownVote = downVoteCount;
+            UpVote = post.VoteRegistrations.Where(vr => vr.VoteValue == VoteEnum.UpVote).Count();
+            DownVote = post.VoteRegistrations.Where(vr => vr.VoteValue == VoteEnum.DownVote).Count();
             CommunityId = post.CommunityId;
             CommunityName = post.Community != null ? post.Community.Title : "not found";
             Username = post.User != null? post.User.UserName : "not found";
             IsSaved = isSaved;
-            upVoted = hasUpVoted;
-            downVoted = hasDownVoted;
+            UpVoted = hasUpVoted;
+            DownVoted = hasDownVoted;
+            CommentCount = post.Comments.Count();
+            Comments = post.Comments != null ? post.Comments.Select(c => new GetCommentDto(c)).ToList() : new List<GetCommentDto>();
         }
 
         public GetPostDto(Models.Post post){
@@ -61,6 +69,10 @@ namespace reddit_clone.Dtos.Post
             CommunityId = post.CommunityId;
             CommunityName = post.Community != null ? post.Community.Title : "not found";
             Username = post.User != null? post.User.UserName : "not found";
+            CommentCount = post.Comments.Count();
+            UpVote = post.VoteRegistrations.Where(vr => vr.VoteValue == VoteEnum.UpVote).Count();
+            DownVote = post.VoteRegistrations.Where(vr => vr.VoteValue == VoteEnum.DownVote).Count();
+            Comments = post.Comments != null ? post.Comments.Select(c => new GetCommentDto(c)).ToList() : new List<GetCommentDto>();
         }
 
         public GetPostDto(){}

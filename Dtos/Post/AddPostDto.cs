@@ -14,6 +14,5 @@ namespace reddit_clone.Dtos.Post
         public int? CommunityId {get; set;}
         public string? UserId {get; set;}
         public string? ApplicationUserId { get; set;}
-
     }
 }

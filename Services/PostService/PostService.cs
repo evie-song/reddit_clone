@@ -95,11 +95,10 @@ namespace reddit_clone.Services.PostService
             var posts = await _context.Posts
                 .Include(p => p.Community)
                 .Include(p => p.User)
+                .Include(p => p.Comments)
+                .Include(p => p.VoteRegistrations)
                 .Select(p => new GetPostDto(
-                    p,
-                    false,
-                    _context.VoteRegistrations.Count(vr => vr.PostId == p.Id && vr.VoteValue == VoteEnum.UpVote),
-                    _context.VoteRegistrations.Count(vr => vr.PostId == p.Id && vr.VoteValue == VoteEnum.DownVote)
+                    p
                 ))
                 .ToListAsync();
             servicesResponse.Data = posts.OrderBy(post => post.Id).ToList();
@@ -112,11 +111,11 @@ namespace reddit_clone.Services.PostService
             var posts = await _context.Posts
                 .Include(p => p.Community)
                 .Include(p => p.User)
+                .Include(p => p.Comments)
+                .Include(p => p.VoteRegistrations)
                 .Select(p => new GetPostDto(
                     p,
                     _context.SavedPosts.Any(sp => sp.PostId == p.Id && sp.ApplicationUserId == userId),
-                    _context.VoteRegistrations.Count(vr => vr.PostId == p.Id && vr.VoteValue == VoteEnum.UpVote),
-                    _context.VoteRegistrations.Count(vr => vr.PostId == p.Id && vr.VoteValue == VoteEnum.DownVote),
                     _context.VoteRegistrations.Any(vr => vr.PostId == p.Id && vr.ApplicationUserId == userId && vr.VoteValue == VoteEnum.UpVote),
                     _context.VoteRegistrations.Any(vr => vr.PostId == p.Id && vr.ApplicationUserId == userId && vr.VoteValue == VoteEnum.DownVote)
                 ))
@@ -125,20 +124,17 @@ namespace reddit_clone.Services.PostService
             return servicesResponse;
         }
 
-
-
         public async Task<ServiceResponse<GetPostDto>> GetPostById(int id)
         {
             var servicesResponse = new ServiceResponse<GetPostDto>();
             var dbPost = await _context.Posts
                 .Include(p => p.Community)
                 .Include(p => p.User)
+                .Include(p => p.Comments)
+                .Include(p => p.VoteRegistrations)
                 .FirstOrDefaultAsync(p => p.Id == id);
             servicesResponse.Data = new GetPostDto(
-                dbPost,
-                false,
-                _context.VoteRegistrations.Count(vr => vr.PostId == dbPost.Id && vr.VoteValue == VoteEnum.UpVote),
-                _context.VoteRegistrations.Count(vr => vr.PostId == dbPost.Id && vr.VoteValue == VoteEnum.DownVote)
+                dbPost
             );
             return servicesResponse;
         }
@@ -148,12 +144,12 @@ namespace reddit_clone.Services.PostService
             var dbPost = await _context.Posts
                 .Include(p => p.Community)
                 .Include(p => p.User)
+                .Include(p => p.Comments)
+                .Include(p => p.VoteRegistrations)
                 .FirstOrDefaultAsync(p => p.Id == id);
             servicesResponse.Data = new GetPostDto(
                 dbPost,
                 _context.SavedPosts.Any(sp => sp.PostId == dbPost.Id && sp.ApplicationUserId == userId),
-                _context.VoteRegistrations.Count(vr => vr.PostId == dbPost.Id && vr.VoteValue == VoteEnum.UpVote),
-                _context.VoteRegistrations.Count(vr => vr.PostId == dbPost.Id && vr.VoteValue == VoteEnum.DownVote),
                 _context.VoteRegistrations.Any(vr => vr.PostId == dbPost.Id && vr.ApplicationUserId == userId && vr.VoteValue == VoteEnum.UpVote),
                 _context.VoteRegistrations.Any(vr => vr.PostId == dbPost.Id && vr.ApplicationUserId == userId && vr.VoteValue == VoteEnum.DownVote)
             );

@@ -11,6 +11,5 @@ namespace reddit_clone_backend.Dtos.Comment
         public string ApplicationUserId { get; set;}
         public int PostId { get; set; }
         public int? BaseCommentId { get; set; } = null;
-
     }
 }

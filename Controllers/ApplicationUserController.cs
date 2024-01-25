@@ -38,12 +38,12 @@ namespace reddit_clone_backend.Controllers
             var posts = await _context.Posts
                 .Include(p => p.Community )
                 .Include(p => p.User )
+                .Include(p => p.Comments)
+                .Include(p => p.VoteRegistrations)
                 .Where(p => postIds.Contains(p.Id))
                 .Select(p => new GetPostDto(
                     p,
                     _context.SavedPosts.Any(sp => sp.PostId == p.Id && sp.ApplicationUserId == userId),
-                    _context.VoteRegistrations.Count(vr => vr.PostId == p.Id && vr.VoteValue == VoteEnum.UpVote),
-                    _context.VoteRegistrations.Count(vr => vr.PostId == p.Id && vr.VoteValue == VoteEnum.DownVote),
                     _context.VoteRegistrations.Any(vr => vr.PostId == p.Id && vr.ApplicationUserId == userId && vr.VoteValue == VoteEnum.UpVote),
                     _context.VoteRegistrations.Any(vr => vr.PostId == p.Id && vr.ApplicationUserId == userId && vr.VoteValue == VoteEnum.DownVote)
                 ))
@@ -63,12 +63,12 @@ namespace reddit_clone_backend.Controllers
             var posts = await _context.Posts
                 .Include(p => p.Community )
                 .Include(p => p.User )
+                .Include(p => p.Comments)
+                .Include(p => p.VoteRegistrations)
                 .Where(p => postIds.Contains(p.Id))
                 .Select(p => new GetPostDto(
                     p,
                     _context.SavedPosts.Any(sp => sp.PostId == p.Id && sp.ApplicationUserId == userId),
-                    _context.VoteRegistrations.Count(vr => vr.PostId == p.Id && vr.VoteValue == VoteEnum.UpVote),
-                    _context.VoteRegistrations.Count(vr => vr.PostId == p.Id && vr.VoteValue == VoteEnum.DownVote),
                     _context.VoteRegistrations.Any(vr => vr.PostId == p.Id && vr.ApplicationUserId == userId && vr.VoteValue == VoteEnum.UpVote),
                     _context.VoteRegistrations.Any(vr => vr.PostId == p.Id && vr.ApplicationUserId == userId && vr.VoteValue == VoteEnum.DownVote)
                 ))
@@ -88,12 +88,12 @@ namespace reddit_clone_backend.Controllers
             var posts = await _context.Posts
                 .Include(p => p.Community )
                 .Include(p => p.User )
+                .Include(p => p.Comments)
+                .Include(p => p.VoteRegistrations)
                 .Where(p => postIds.Contains(p.Id))
                 .Select(p => new GetPostDto(
                     p,
                     _context.SavedPosts.Any(sp => sp.PostId == p.Id && sp.ApplicationUserId == userId),
-                    _context.VoteRegistrations.Count(vr => vr.PostId == p.Id && vr.VoteValue == VoteEnum.UpVote),
-                    _context.VoteRegistrations.Count(vr => vr.PostId == p.Id && vr.VoteValue == VoteEnum.DownVote),
                     _context.VoteRegistrations.Any(vr => vr.PostId == p.Id && vr.ApplicationUserId == userId && vr.VoteValue == VoteEnum.UpVote),
                     _context.VoteRegistrations.Any(vr => vr.PostId == p.Id && vr.ApplicationUserId == userId && vr.VoteValue == VoteEnum.DownVote)
                 ))
