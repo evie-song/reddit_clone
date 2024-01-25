@@ -12,13 +12,18 @@ namespace reddit_clone_backend.Dtos.Comment
         public DateTime CreatedAt { get; private set; } 
         public string Username {get; set;}
         public int PostId { get; set; }
+        public int? BaseCommentId { get; set; }
+        public ICollection<GetCommentDto>? ChildComments { get; set; }
 
         public GetCommentDto(Models.Comment comment) {
             Id = comment.Id;
             Content = comment.Content;
             CreatedAt = comment.CreatedAt;
-            Username = comment.ApplicationUserId;
+            Username = comment.ApplicationUser.Username;
             PostId = comment.PostId;
+            BaseCommentId = comment.BaseCommentId;
+            ChildComments = comment.ChildComments.Select(c => new GetCommentDto(c)).ToList();
+            // ChildComments = comment.ChildComments != null ? comment.ChildComments.Select(c => new GetCommentDto(c)).ToList() : new List<GetCommentDto>();
         }
         public GetCommentDto() {
 

@@ -96,6 +96,11 @@ namespace reddit_clone.Services.PostService
                 .Include(p => p.Community)
                 .Include(p => p.User)
                 .Include(p => p.Comments)
+                    .ThenInclude(c => c.ChildComments)
+                .Include(p => p.Comments)
+                    .ThenInclude(c => c.ApplicationUser)
+                .Include(p => p.Comments)
+                    .ThenInclude(c => c.ChildComments)
                 .Include(p => p.VoteRegistrations)
                 .Select(p => new GetPostDto(
                     p
@@ -112,6 +117,9 @@ namespace reddit_clone.Services.PostService
                 .Include(p => p.Community)
                 .Include(p => p.User)
                 .Include(p => p.Comments)
+                    .ThenInclude(c => c.ChildComments)
+                .Include(p => p.Comments)
+                    .ThenInclude(c => c.ApplicationUser)
                 .Include(p => p.VoteRegistrations)
                 .Select(p => new GetPostDto(
                     p,
@@ -131,6 +139,9 @@ namespace reddit_clone.Services.PostService
                 .Include(p => p.Community)
                 .Include(p => p.User)
                 .Include(p => p.Comments)
+                    .ThenInclude(c => c.ChildComments)
+                .Include(p => p.Comments)
+                    .ThenInclude(c => c.ApplicationUser)
                 .Include(p => p.VoteRegistrations)
                 .FirstOrDefaultAsync(p => p.Id == id);
             servicesResponse.Data = new GetPostDto(
@@ -145,6 +156,9 @@ namespace reddit_clone.Services.PostService
                 .Include(p => p.Community)
                 .Include(p => p.User)
                 .Include(p => p.Comments)
+                    .ThenInclude(c => c.ChildComments)
+                .Include(p => p.Comments)
+                    .ThenInclude(c => c.ApplicationUser)
                 .Include(p => p.VoteRegistrations)
                 .FirstOrDefaultAsync(p => p.Id == id);
             servicesResponse.Data = new GetPostDto(

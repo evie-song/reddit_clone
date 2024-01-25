@@ -69,7 +69,8 @@ namespace reddit_clone_backend.Controllers
 
                 if (is_created.Succeeded) {
                     var new_application_user = new ApplicationUser() {
-                        Id = new_user.Id
+                        Id = new_user.Id,
+                        Username = new_user.UserName
                     };
                     _context.ApplicationUsers.Add(new_application_user);
                     await _context.SaveChangesAsync();
