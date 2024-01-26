@@ -99,8 +99,6 @@ namespace reddit_clone.Services.PostService
                     .ThenInclude(c => c.ChildComments)
                 .Include(p => p.Comments)
                     .ThenInclude(c => c.ApplicationUser)
-                .Include(p => p.Comments)
-                    .ThenInclude(c => c.ChildComments)
                 .Include(p => p.VoteRegistrations)
                 .Select(p => new GetPostDto(
                     p

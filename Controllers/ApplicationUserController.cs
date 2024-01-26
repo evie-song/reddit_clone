@@ -39,6 +39,7 @@ namespace reddit_clone_backend.Controllers
                 .Include(p => p.Community )
                 .Include(p => p.User )
                 .Include(p => p.Comments)
+                    .ThenInclude(c => c.ApplicationUser)
                 .Include(p => p.VoteRegistrations)
                 .Where(p => postIds.Contains(p.Id))
                 .Select(p => new GetPostDto(
@@ -64,6 +65,7 @@ namespace reddit_clone_backend.Controllers
                 .Include(p => p.Community )
                 .Include(p => p.User )
                 .Include(p => p.Comments)
+                    .ThenInclude(c => c.ApplicationUser)
                 .Include(p => p.VoteRegistrations)
                 .Where(p => postIds.Contains(p.Id))
                 .Select(p => new GetPostDto(
@@ -89,6 +91,7 @@ namespace reddit_clone_backend.Controllers
                 .Include(p => p.Community )
                 .Include(p => p.User )
                 .Include(p => p.Comments)
+                    .ThenInclude(c => c.ApplicationUser)
                 .Include(p => p.VoteRegistrations)
                 .Where(p => postIds.Contains(p.Id))
                 .Select(p => new GetPostDto(
@@ -100,6 +103,27 @@ namespace reddit_clone_backend.Controllers
                 .ToListAsync();
             return Ok(posts);
         }
+
+        [HttpGet("{userId}/posts")]
+         public async Task<ActionResult<List<GetPostDto>>> GetUserPosts (string userId) {
+
+            var posts = await _context.Posts
+                .Include(p => p.Community )
+                .Include(p => p.User )
+                .Include(p => p.Comments)
+                    .ThenInclude(c => c.ApplicationUser)
+                .Include(p => p.VoteRegistrations)
+                .Where(p => p.ApplicationUserId == userId)
+                .Select(p => new GetPostDto(
+                    p,
+                    _context.SavedPosts.Any(sp => sp.PostId == p.Id && sp.ApplicationUserId == userId),
+                    _context.VoteRegistrations.Any(vr => vr.PostId == p.Id && vr.ApplicationUserId == userId && vr.VoteValue == VoteEnum.UpVote),
+                    _context.VoteRegistrations.Any(vr => vr.PostId == p.Id && vr.ApplicationUserId == userId && vr.VoteValue == VoteEnum.DownVote)
+                ))
+                .ToListAsync();
+            return Ok(posts);
+        }
+
 
         // public IActionResult Index()
         // {

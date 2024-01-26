@@ -25,7 +25,7 @@ namespace reddit_clone.Dtos.Post
         public string? Username { get; set; }
         public bool IsSaved { get; set; } = false;
         public int CommentCount { get; set; } = 0;
-        public List<GetCommentDto> Comments { get; set; } = new List<GetCommentDto>();
+        public List<GetCommentDto>? Comments { get; set; } = new List<GetCommentDto>();
 
         // public GetPostDto(Models.Post post, bool isSaved){
         //     Id = post.Id;
