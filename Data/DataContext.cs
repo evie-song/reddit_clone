@@ -69,6 +69,20 @@ namespace reddit_clone.Data
                 .WithMany(c => c.ChildComments)
                 .HasForeignKey(c => c.BaseCommentId);
 
+
+            modelBuilder.Entity<CommentVoteRegistration>()
+                .HasKey(vr => new { vr.ApplicationUserId, vr.CommentId });
+
+            modelBuilder.Entity<CommentVoteRegistration>()
+                .HasOne(cvr => cvr.ApplicationUser)
+                .WithMany(au => au.CommentVoteRegistrations)
+                .HasForeignKey(cvr => cvr.ApplicationUserId);
+
+            modelBuilder.Entity<CommentVoteRegistration>()
+                .HasOne(cvr => cvr.Comment)
+                .WithMany(c => c.CommentVoteRegistrations)
+                .HasForeignKey(cvr => cvr.CommentId);
+
             //     modelBuilder.Entity<Community>()
             //         .HasMany(a => a.Posts)
             //         .WithOne(b => b.Community)

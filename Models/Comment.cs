@@ -20,9 +20,11 @@ namespace reddit_clone_backend.Models
         public ApplicationUser ApplicationUser { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime? LastModifiedAt { get; set; }
+        public ICollection<CommentVoteRegistration> CommentVoteRegistrations { get; set; }
 
         public Comment() {
             ChildComments = new List<Comment>();
+            CommentVoteRegistrations = new List<CommentVoteRegistration>();
             CreatedAt = DateTime.Now;
         }
     }
