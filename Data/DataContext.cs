@@ -21,6 +21,7 @@ namespace reddit_clone.Data
         public DbSet<SavedPost> SavedPosts => Set<SavedPost>();
         public DbSet<VoteRegistration> VoteRegistrations => Set<VoteRegistration>();
         public DbSet<Comment> Comments => Set<Comment>();
+        public DbSet<CommentVoteRegistration> CommentVoteRegistrations => Set<CommentVoteRegistration>();
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
