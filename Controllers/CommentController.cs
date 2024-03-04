@@ -30,16 +30,21 @@ namespace reddit_clone_backend.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<List<GetCommentDto>>> AddComment(AddCommentDto request) {
+        public async Task<ActionResult<GetCommentDto>> AddComment(AddCommentDto request) {
             var newComment = _mapper.Map<Comment>(request);
             _context.Comments.Add(newComment);
             await _context.SaveChangesAsync();
-            var comments = await _context.Comments
+
+            newComment = await _context.Comments
                 .Include(c => c.ApplicationUser)
                 .Include(c => c.ChildComments)
-                .Select(c => new GetCommentDto(c))
-                .ToListAsync();
-            return Ok(comments);
+                    .ThenInclude(cc => cc.CommentVoteRegistrations)
+                .Include(c => c.CommentVoteRegistrations)
+                .SingleOrDefaultAsync(c => c.Id == newComment.Id);
+
+            var commentDto = new GetCommentDto(newComment);
+          
+            return commentDto;
         }
 
         [HttpGet]
@@ -47,12 +52,12 @@ namespace reddit_clone_backend.Controllers
             var comments = await _context.Comments
                 .Include(c => c.ApplicationUser)
                 .Include(c => c.ChildComments)
+                    .ThenInclude(cc => cc.CommentVoteRegistrations) 
+                .Include(c => c.CommentVoteRegistrations)
                 .Select(c => new GetCommentDto(c))
                 .ToListAsync();
             return Ok(comments);
         }
-
-
 
 
         // public IActionResult Index()

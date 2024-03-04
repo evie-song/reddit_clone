@@ -16,6 +16,7 @@ namespace reddit_clone.Dtos.Post
         public string? Title { get; set; }
         public string? Content { get; set; }
         public DateTime CreatedTime { get; private set; }
+        public int TotalVote {get; set; } = 0;
         public bool UpVoted { get; set; } = false;
         public bool DownVoted { get; set; } = false;
         public int? UpVote { get; set; }
@@ -58,6 +59,27 @@ namespace reddit_clone.Dtos.Post
             DownVoted = hasDownVoted;
             CommentCount = post.Comments.Count();
             Comments = post.Comments != null ? post.Comments.Where(c => c.BaseCommentId == null).Select(c => new GetCommentDto(c)).ToList() : new List<GetCommentDto>();
+            TotalVote = post.TotalVoteCount;
+        }
+
+
+        public GetPostDto(Models.Post post, bool isSaved, string userId)
+        {
+            Id = post.Id;
+            Title = post.Title;
+            Content = post.Content;
+            CreatedTime = post.CreatedTime;
+            UpVote = post.VoteRegistrations.Where(vr => vr.VoteValue == VoteEnum.UpVote).Count();
+            DownVote = post.VoteRegistrations.Where(vr => vr.VoteValue == VoteEnum.DownVote).Count();
+            CommunityId = post.CommunityId;
+            CommunityName = post.Community != null ? post.Community.Title : "not found";
+            Username = post.User != null ? post.User.UserName : "not found";
+            IsSaved = isSaved;
+            UpVoted = post.VoteRegistrations.Any(vr => vr.PostId == post.Id && vr.ApplicationUserId == userId && vr.VoteValue == VoteEnum.UpVote);
+            DownVoted = post.VoteRegistrations.Any(vr => vr.PostId == post.Id && vr.ApplicationUserId == userId && vr.VoteValue == VoteEnum.DownVote);
+            CommentCount = post.Comments.Count();
+            Comments = post.Comments != null ? post.Comments.Where(c => c.BaseCommentId == null).Select(c => new GetCommentDto(c)).ToList() : new List<GetCommentDto>();
+            TotalVote = post.TotalVoteCount;
         }
 
         public GetPostDto(Models.Post post)
@@ -66,8 +88,8 @@ namespace reddit_clone.Dtos.Post
             Title = post.Title;
             Content = post.Content;
             CreatedTime = post.CreatedTime;
-            UpVote = post.UpVote;
-            DownVote = post.DownVote;
+            // UpVote = post.UpVote;
+            // DownVote = post.DownVote;
             CommunityId = post.CommunityId;
             CommunityName = post.Community != null ? post.Community.Title : "not found";
             Username = post.User != null ? post.User.UserName : "not found";
@@ -75,6 +97,7 @@ namespace reddit_clone.Dtos.Post
             UpVote = post.VoteRegistrations.Where(vr => vr.VoteValue == VoteEnum.UpVote).Count();
             DownVote = post.VoteRegistrations.Where(vr => vr.VoteValue == VoteEnum.DownVote).Count();
             Comments = post.Comments != null ? post.Comments.Where(c => c.BaseCommentId == null).Select(c => new GetCommentDto(c)).ToList() : new List<GetCommentDto>();
+            TotalVote = post.TotalVoteCount;
         }
 
         public GetPostDto() { }

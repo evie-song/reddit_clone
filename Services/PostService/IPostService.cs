@@ -13,10 +13,6 @@ namespace reddit_clone.Services.PostService
         Task<ServiceResponse<GetPostDto>> GetPostById(int id);
         Task<ServiceResponse<GetPostDto>> GetPostByIdPerUser(int id, string userId);
         Task<ServiceResponse<List<GetPostDto>>> AddPost(AddPostDto newPost);
-        Task<ServiceResponse<GetPostDto>> UpdatePost(UpdatePostDto updatePost);
         Task<ServiceResponse<List<GetPostDto>>> DeletePost(int id);
-        Task<ServiceResponse<GetPostDto>> IncreaseVoteByOne(int id);
-        Task<ServiceResponse<GetPostDto>> DecreaseVoteByOne(int id);
-
     }
 }

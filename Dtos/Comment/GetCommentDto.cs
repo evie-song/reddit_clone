@@ -13,6 +13,7 @@ namespace reddit_clone_backend.Dtos.Comment
         public string Username {get; set;}
         public int PostId { get; set; }
         public int? BaseCommentId { get; set; }
+        public int TotalVoteCount { get; set; } 
         public ICollection<GetCommentDto>? ChildComments { get; set; }
 
         public GetCommentDto(Models.Comment comment) {
@@ -22,6 +23,7 @@ namespace reddit_clone_backend.Dtos.Comment
             Username = comment.ApplicationUser.Username;
             PostId = comment.PostId;
             BaseCommentId = comment.BaseCommentId;
+            TotalVoteCount = comment.TotalVoteCount;
             ChildComments = comment.ChildComments.Select(c => new GetCommentDto(c)).ToList();
             // ChildComments = comment.ChildComments != null ? comment.ChildComments.Select(c => new GetCommentDto(c)).ToList() : new List<GetCommentDto>();
         }

@@ -9,6 +9,7 @@ using System.Web.Http.Cors;
 using reddit_clone.Data;
 using reddit_clone_backend.Models;
 using System.ComponentModel;
+using Microsoft.EntityFrameworkCore;
 
 namespace reddit_clone_backend.Controllers
 {
@@ -28,16 +29,17 @@ namespace reddit_clone_backend.Controllers
         }
 
         [HttpGet("{userId}/saved")]
-        public async Task<ActionResult<List<GetPostDto>>> GetSavedPosts (string userId) {
-            var savedPosts = await _context.SavedPosts 
+        public async Task<ActionResult<List<GetPostDto>>> GetSavedPosts(string userId)
+        {
+            var savedPosts = await _context.SavedPosts
                 .Where(sp => sp.ApplicationUserId == userId)
                 .ToListAsync();
 
             var postIds = savedPosts.Select(sp => sp.PostId).ToList();
 
             var posts = await _context.Posts
-                .Include(p => p.Community )
-                .Include(p => p.User )
+                .Include(p => p.Community)
+                .Include(p => p.User)
                 .Include(p => p.Comments)
                     .ThenInclude(c => c.ApplicationUser)
                 .Include(p => p.VoteRegistrations)
@@ -45,15 +47,15 @@ namespace reddit_clone_backend.Controllers
                 .Select(p => new GetPostDto(
                     p,
                     _context.SavedPosts.Any(sp => sp.PostId == p.Id && sp.ApplicationUserId == userId),
-                    _context.VoteRegistrations.Any(vr => vr.PostId == p.Id && vr.ApplicationUserId == userId && vr.VoteValue == VoteEnum.UpVote),
-                    _context.VoteRegistrations.Any(vr => vr.PostId == p.Id && vr.ApplicationUserId == userId && vr.VoteValue == VoteEnum.DownVote)
+                    userId
                 ))
                 .ToListAsync();
             return Ok(posts);
         }
 
         [HttpGet("{userId}/upvoted")]
-        public async Task<ActionResult<List<GetPostDto>>> GetUpvotedPosts (string userId) {
+        public async Task<ActionResult<List<GetPostDto>>> GetUpvotedPosts(string userId)
+        {
 
             var upvotedPosts = await _context.VoteRegistrations
                 .Where(vr => vr.ApplicationUserId == userId && vr.VoteValue == VoteEnum.UpVote)
@@ -62,8 +64,8 @@ namespace reddit_clone_backend.Controllers
             var postIds = upvotedPosts.Select(sp => sp.PostId).ToList();
 
             var posts = await _context.Posts
-                .Include(p => p.Community )
-                .Include(p => p.User )
+                .Include(p => p.Community)
+                .Include(p => p.User)
                 .Include(p => p.Comments)
                     .ThenInclude(c => c.ApplicationUser)
                 .Include(p => p.VoteRegistrations)
@@ -71,15 +73,15 @@ namespace reddit_clone_backend.Controllers
                 .Select(p => new GetPostDto(
                     p,
                     _context.SavedPosts.Any(sp => sp.PostId == p.Id && sp.ApplicationUserId == userId),
-                    _context.VoteRegistrations.Any(vr => vr.PostId == p.Id && vr.ApplicationUserId == userId && vr.VoteValue == VoteEnum.UpVote),
-                    _context.VoteRegistrations.Any(vr => vr.PostId == p.Id && vr.ApplicationUserId == userId && vr.VoteValue == VoteEnum.DownVote)
+                    userId
                 ))
                 .ToListAsync();
             return Ok(posts);
         }
 
         [HttpGet("{userId}/downvoted")]
-        public async Task<ActionResult<List<GetPostDto>>> GetDownvotedPosts (string userId) {
+        public async Task<ActionResult<List<GetPostDto>>> GetDownvotedPosts(string userId)
+        {
 
             var downvotedPosts = await _context.VoteRegistrations
                 .Where(vr => vr.ApplicationUserId == userId && vr.VoteValue == VoteEnum.DownVote)
@@ -88,8 +90,8 @@ namespace reddit_clone_backend.Controllers
             var postIds = downvotedPosts.Select(sp => sp.PostId).ToList();
 
             var posts = await _context.Posts
-                .Include(p => p.Community )
-                .Include(p => p.User )
+                .Include(p => p.Community)
+                .Include(p => p.User)
                 .Include(p => p.Comments)
                     .ThenInclude(c => c.ApplicationUser)
                 .Include(p => p.VoteRegistrations)
@@ -97,19 +99,19 @@ namespace reddit_clone_backend.Controllers
                 .Select(p => new GetPostDto(
                     p,
                     _context.SavedPosts.Any(sp => sp.PostId == p.Id && sp.ApplicationUserId == userId),
-                    _context.VoteRegistrations.Any(vr => vr.PostId == p.Id && vr.ApplicationUserId == userId && vr.VoteValue == VoteEnum.UpVote),
-                    _context.VoteRegistrations.Any(vr => vr.PostId == p.Id && vr.ApplicationUserId == userId && vr.VoteValue == VoteEnum.DownVote)
+                    userId
                 ))
                 .ToListAsync();
             return Ok(posts);
         }
 
         [HttpGet("{userId}/posts")]
-         public async Task<ActionResult<List<GetPostDto>>> GetUserPosts (string userId) {
+        public async Task<ActionResult<List<GetPostDto>>> GetUserPosts(string userId)
+        {
 
             var posts = await _context.Posts
-                .Include(p => p.Community )
-                .Include(p => p.User )
+                .Include(p => p.Community)
+                .Include(p => p.User)
                 .Include(p => p.Comments)
                     .ThenInclude(c => c.ApplicationUser)
                 .Include(p => p.VoteRegistrations)
@@ -117,12 +119,12 @@ namespace reddit_clone_backend.Controllers
                 .Select(p => new GetPostDto(
                     p,
                     _context.SavedPosts.Any(sp => sp.PostId == p.Id && sp.ApplicationUserId == userId),
-                    _context.VoteRegistrations.Any(vr => vr.PostId == p.Id && vr.ApplicationUserId == userId && vr.VoteValue == VoteEnum.UpVote),
-                    _context.VoteRegistrations.Any(vr => vr.PostId == p.Id && vr.ApplicationUserId == userId && vr.VoteValue == VoteEnum.DownVote)
+                    userId
                 ))
                 .ToListAsync();
             return Ok(posts);
         }
+
 
 
         // public IActionResult Index()

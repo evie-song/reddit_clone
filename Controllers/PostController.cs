@@ -49,42 +49,9 @@ namespace reddit_clone.Controllers
             return Ok(await _postService.AddPost(newPost));
         }
 
-        [HttpPut]
-        public async Task<ActionResult<ServiceResponse<GetPostDto>>> UpdatePost(UpdatePostDto updatePost)
-        {
-            var response = await _postService.UpdatePost(updatePost);
-            if (response.Data is null )
-            {
-                return NotFound(response);
-            }
-            return Ok(response);
-        }
-
         [HttpDelete("{id}")]
         public async Task<ActionResult<ServiceResponse<GetPostDto>>> DeletePost(int id) {
             var response = await _postService.DeletePost(id);
-            if (response.Data is null )
-            {
-                return NotFound(response);
-            }
-            return Ok(response);
-        }
-
-        [HttpPut("upvote/{id}")]
-        public async Task<ActionResult<ServiceResponse<GetPostDto>>> IncreaseVoteByOne(int id)
-        {
-            var response = await _postService.IncreaseVoteByOne(id);
-            if (response.Data is null )
-            {
-                return NotFound(response);
-            }
-            return Ok(response);
-        }
-
-        [HttpPut("downvote/{id}")]
-        public async Task<ActionResult<ServiceResponse<GetPostDto>>> DecreaseVoteByOne(int id)
-        {
-            var response = await _postService.DecreaseVoteByOne(id);
             if (response.Data is null )
             {
                 return NotFound(response);

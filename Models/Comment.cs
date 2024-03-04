@@ -27,6 +27,19 @@ namespace reddit_clone_backend.Models
             CommentVoteRegistrations = new List<CommentVoteRegistration>();
             CreatedAt = DateTime.Now;
         }
+
+        public int TotalVoteCount {
+            get {
+                int totalVote = 0;
+                foreach (var commentVoteRegistration in CommentVoteRegistrations)
+                {
+                    totalVote += (int)commentVoteRegistration.VoteValue;
+                }
+                return totalVote;
+            } 
+        }
+
+
     }
 
 

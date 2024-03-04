@@ -12,7 +12,6 @@ namespace reddit_clone.Services.PostService
 {
     public class PostService : IPostService
     {
-
         private readonly IMapper _mapper;
         private readonly DataContext _context;
         private readonly UserManager<IdentityUser> _userManager;
@@ -41,28 +40,6 @@ namespace reddit_clone.Services.PostService
             return servicesResponse;
         }
 
-        async public Task<ServiceResponse<GetPostDto>> DecreaseVoteByOne(int id)
-        {
-            var servicesResponse = new ServiceResponse<GetPostDto>();
-            try
-            {
-                var post = await _context.Posts.FirstOrDefaultAsync(p => p.Id == id);
-                if (post is null)
-                    throw new Exception($"Charactor with Id `{id}` not found");
-                post.DownVote += 1;
-                await _context.SaveChangesAsync();
-
-                // servicesResponse.Data = _mapper.Map<GetPostDto>(post);
-                servicesResponse.Data = new GetPostDto(post);
-
-            }
-            catch (Exception ex)
-            {
-                servicesResponse.Success = false;
-                servicesResponse.Message = ex.Message;
-            }
-            return servicesResponse;
-        }
 
         public async Task<ServiceResponse<List<GetPostDto>>> DeletePost(int id)
         {
@@ -92,19 +69,9 @@ namespace reddit_clone.Services.PostService
         public async Task<ServiceResponse<List<GetPostDto>>> GetAllPost()
         {
             var servicesResponse = new ServiceResponse<List<GetPostDto>>();
-            var posts = await _context.Posts
-                .Include(p => p.Community)
-                .Include(p => p.User)
-                .Include(p => p.Comments)
-                    .ThenInclude(c => c.ChildComments)
-                .Include(p => p.Comments)
-                    .ThenInclude(c => c.ApplicationUser)
-                .Include(p => p.VoteRegistrations)
-                .Select(p => new GetPostDto(
-                    p
-                ))
-                .ToListAsync();
-            servicesResponse.Data = posts.OrderBy(post => post.Id).ToList();
+            var posts = await GetAllPostsWithRelations();
+
+            servicesResponse.Data = posts.Select(p => new GetPostDto(p)).OrderBy(post => post.Id).ToList();
             return servicesResponse;
         }
 
@@ -122,8 +89,7 @@ namespace reddit_clone.Services.PostService
                 .Select(p => new GetPostDto(
                     p,
                     _context.SavedPosts.Any(sp => sp.PostId == p.Id && sp.ApplicationUserId == userId),
-                    _context.VoteRegistrations.Any(vr => vr.PostId == p.Id && vr.ApplicationUserId == userId && vr.VoteValue == VoteEnum.UpVote),
-                    _context.VoteRegistrations.Any(vr => vr.PostId == p.Id && vr.ApplicationUserId == userId && vr.VoteValue == VoteEnum.DownVote)
+                    userId
                 ))
                 .ToListAsync();
             servicesResponse.Data = posts.OrderBy(post => post.Id).ToList();
@@ -148,7 +114,8 @@ namespace reddit_clone.Services.PostService
             return servicesResponse;
         }
 
-        public async Task<ServiceResponse<GetPostDto>> GetPostByIdPerUser(int id, string userId){
+        public async Task<ServiceResponse<GetPostDto>> GetPostByIdPerUser(int id, string userId)
+        {
             var servicesResponse = new ServiceResponse<GetPostDto>();
             var dbPost = await _context.Posts
                 .Include(p => p.Community)
@@ -162,62 +129,25 @@ namespace reddit_clone.Services.PostService
             servicesResponse.Data = new GetPostDto(
                 dbPost,
                 _context.SavedPosts.Any(sp => sp.PostId == dbPost.Id && sp.ApplicationUserId == userId),
-                _context.VoteRegistrations.Any(vr => vr.PostId == dbPost.Id && vr.ApplicationUserId == userId && vr.VoteValue == VoteEnum.UpVote),
-                _context.VoteRegistrations.Any(vr => vr.PostId == dbPost.Id && vr.ApplicationUserId == userId && vr.VoteValue == VoteEnum.DownVote)
+                userId
             );
             return servicesResponse;
         }
 
-
-        public async Task<ServiceResponse<GetPostDto>> IncreaseVoteByOne(int id)
+        private async Task<List<Post>> GetAllPostsWithRelations()
         {
-            var servicesResponse = new ServiceResponse<GetPostDto>();
-            try
-            {
-                var post = await _context.Posts.FirstOrDefaultAsync(p => p.Id == id);
-                if (post is null)
-                    throw new Exception($"Charactor with Id `{id}` not found");
-                post.UpVote += 1;
-                await _context.SaveChangesAsync();
-
-                servicesResponse.Data = _mapper.Map<GetPostDto>(post);
-
-            }
-            catch (Exception ex)
-            {
-                servicesResponse.Success = false;
-                servicesResponse.Message = ex.Message;
-            }
-            return servicesResponse;
-
+            return await _context.Posts
+                .Include(p => p.Community)
+                .Include(p => p.User)
+                .Include(p => p.Comments)
+                    .ThenInclude(c => c.CommentVoteRegistrations)
+                .Include(p => p.Comments)
+                    .ThenInclude(c => c.ChildComments)
+                        .ThenInclude (cc => cc.CommentVoteRegistrations)
+                .Include(p => p.Comments)
+                    .ThenInclude(c => c.ApplicationUser)
+                .Include(p => p.VoteRegistrations)
+                .ToListAsync();
         }
-
-        public async Task<ServiceResponse<GetPostDto>> UpdatePost(UpdatePostDto updatePost)
-        {
-            var servicesResponse = new ServiceResponse<GetPostDto>();
-
-            try
-            {
-                var post = await _context.Posts.FindAsync(updatePost.Id);
-
-                if (post is null)
-                    throw new Exception($"Charactor with Id `{updatePost.Id}` not found");
-                post.Title = updatePost.Title;
-                post.Content = updatePost.Content;
-                post.UpVote = updatePost.UpVote;
-                post.DownVote = updatePost.DownVote;
-                await _context.SaveChangesAsync();
-
-                servicesResponse.Data = _mapper.Map<GetPostDto>(post);
-            }
-            catch (Exception ex)
-            {
-                servicesResponse.Success = false;
-                servicesResponse.Message = ex.Message;
-            }
-            return servicesResponse;
-        }
-
-
     }
 }
