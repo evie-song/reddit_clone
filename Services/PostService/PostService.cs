@@ -78,36 +78,21 @@ namespace reddit_clone.Services.PostService
         public async Task<ServiceResponse<List<GetPostDto>>> GetByUser(string userId)
         {
             var servicesResponse = new ServiceResponse<List<GetPostDto>>();
-            var posts = await _context.Posts
-                .Include(p => p.Community)
-                .Include(p => p.User)
-                .Include(p => p.Comments)
-                    .ThenInclude(c => c.ChildComments)
-                .Include(p => p.Comments)
-                    .ThenInclude(c => c.ApplicationUser)
-                .Include(p => p.VoteRegistrations)
-                .Select(p => new GetPostDto(
-                    p,
-                    _context.SavedPosts.Any(sp => sp.PostId == p.Id && sp.ApplicationUserId == userId),
-                    userId
-                ))
-                .ToListAsync();
-            servicesResponse.Data = posts.OrderBy(post => post.Id).ToList();
+
+            var posts = await GetAllPostsWithRelations();
+
+            servicesResponse.Data = posts.Select(p => new GetPostDto(
+                p,
+                _context.SavedPosts.Any(sp => sp.PostId == p.Id && sp.ApplicationUserId == userId),
+                userId
+                )).OrderBy(post => post.Id).ToList();
             return servicesResponse;
         }
 
         public async Task<ServiceResponse<GetPostDto>> GetPostById(int id)
         {
             var servicesResponse = new ServiceResponse<GetPostDto>();
-            var dbPost = await _context.Posts
-                .Include(p => p.Community)
-                .Include(p => p.User)
-                .Include(p => p.Comments)
-                    .ThenInclude(c => c.ChildComments)
-                .Include(p => p.Comments)
-                    .ThenInclude(c => c.ApplicationUser)
-                .Include(p => p.VoteRegistrations)
-                .FirstOrDefaultAsync(p => p.Id == id);
+            var dbPost = await GetSinglePostsWithRelations(id);
             servicesResponse.Data = new GetPostDto(
                 dbPost
             );
@@ -117,15 +102,7 @@ namespace reddit_clone.Services.PostService
         public async Task<ServiceResponse<GetPostDto>> GetPostByIdPerUser(int id, string userId)
         {
             var servicesResponse = new ServiceResponse<GetPostDto>();
-            var dbPost = await _context.Posts
-                .Include(p => p.Community)
-                .Include(p => p.User)
-                .Include(p => p.Comments)
-                    .ThenInclude(c => c.ChildComments)
-                .Include(p => p.Comments)
-                    .ThenInclude(c => c.ApplicationUser)
-                .Include(p => p.VoteRegistrations)
-                .FirstOrDefaultAsync(p => p.Id == id);
+            var dbPost = await GetSinglePostsWithRelations(id);
             servicesResponse.Data = new GetPostDto(
                 dbPost,
                 _context.SavedPosts.Any(sp => sp.PostId == dbPost.Id && sp.ApplicationUserId == userId),
@@ -143,11 +120,28 @@ namespace reddit_clone.Services.PostService
                     .ThenInclude(c => c.CommentVoteRegistrations)
                 .Include(p => p.Comments)
                     .ThenInclude(c => c.ChildComments)
-                        .ThenInclude (cc => cc.CommentVoteRegistrations)
+                        .ThenInclude(cc => cc.CommentVoteRegistrations)
                 .Include(p => p.Comments)
                     .ThenInclude(c => c.ApplicationUser)
                 .Include(p => p.VoteRegistrations)
                 .ToListAsync();
+        }
+
+
+        private async Task<Post?> GetSinglePostsWithRelations(int postId)
+        {
+            return await _context.Posts
+                .Include(p => p.Community)
+                .Include(p => p.User)
+                .Include(p => p.Comments)
+                    .ThenInclude(c => c.CommentVoteRegistrations)
+                .Include(p => p.Comments)
+                    .ThenInclude(c => c.ChildComments)
+                        .ThenInclude(cc => cc.CommentVoteRegistrations)
+                .Include(p => p.Comments)
+                    .ThenInclude(c => c.ApplicationUser)
+                .Include(p => p.VoteRegistrations)
+                .FirstOrDefaultAsync(p => p.Id == postId);
         }
     }
 }
