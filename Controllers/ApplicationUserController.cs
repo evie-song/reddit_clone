@@ -10,6 +10,7 @@ using reddit_clone.Data;
 using reddit_clone_backend.Models;
 using System.ComponentModel;
 using Microsoft.EntityFrameworkCore;
+using reddit_clone_backend.Dtos.ApplicationUser;
 
 namespace reddit_clone_backend.Controllers
 {
@@ -26,6 +27,18 @@ namespace reddit_clone_backend.Controllers
         {
             _logger = logger;
             _context = context;
+        }
+
+        [HttpGet("userInfo/{userId}")]
+        public async Task<ActionResult<GetUserInfoDto>> GetUserInfo(string userId) {
+            var user = await _context.ApplicationUsers
+                .Include(au => au.VoteRegistrations)
+                .Include(au => au.SavedPosts)
+                .Include(au => au.CommentVoteRegistrations)
+                .FirstOrDefaultAsync(au => au.Id == userId);
+
+            var info = new GetUserInfoDto(user);
+            return Ok(info);
         }
 
         [HttpGet("{userId}/saved")]
