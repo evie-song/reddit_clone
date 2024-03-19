@@ -75,38 +75,12 @@ namespace reddit_clone.Services.PostService
             return servicesResponse;
         }
 
-        public async Task<ServiceResponse<List<GetPostDto>>> GetByUser(string userId)
-        {
-            var servicesResponse = new ServiceResponse<List<GetPostDto>>();
-
-            var posts = await GetAllPostsWithRelations();
-
-            servicesResponse.Data = posts.Select(p => new GetPostDto(
-                p,
-                _context.SavedPosts.Any(sp => sp.PostId == p.Id && sp.ApplicationUserId == userId),
-                userId
-                )).OrderBy(post => post.Id).ToList();
-            return servicesResponse;
-        }
-
         public async Task<ServiceResponse<GetPostDto>> GetPostById(int id)
         {
             var servicesResponse = new ServiceResponse<GetPostDto>();
             var dbPost = await GetSinglePostsWithRelations(id);
             servicesResponse.Data = new GetPostDto(
                 dbPost
-            );
-            return servicesResponse;
-        }
-
-        public async Task<ServiceResponse<GetPostDto>> GetPostByIdPerUser(int id, string userId)
-        {
-            var servicesResponse = new ServiceResponse<GetPostDto>();
-            var dbPost = await GetSinglePostsWithRelations(id);
-            servicesResponse.Data = new GetPostDto(
-                dbPost,
-                _context.SavedPosts.Any(sp => sp.PostId == dbPost.Id && sp.ApplicationUserId == userId),
-                userId
             );
             return servicesResponse;
         }

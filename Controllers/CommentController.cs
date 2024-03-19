@@ -59,6 +59,18 @@ namespace reddit_clone_backend.Controllers
             return Ok(comments);
         }
 
+        [HttpGet("GetByPostId/{id}")]
+        public async Task<ActionResult<List<GetCommentDto>>> GetCommentsByPostId (int id) {
+            var comments = await _context.Comments
+                .Include(c => c.ApplicationUser)
+                .Include(c => c.ChildComments)
+                    .ThenInclude(cc => cc.CommentVoteRegistrations) 
+                .Include(c => c.CommentVoteRegistrations)
+                .Where( c => c.PostId == id)
+                .Select(c => new GetCommentDto(c))
+                .ToListAsync();
+            return Ok(comments);
+        }
 
         // public IActionResult Index()
         // {

@@ -26,21 +26,10 @@ namespace reddit_clone.Controllers
             return Ok(await _postService.GetAllPost());
         }
 
-        [HttpGet("GetByUser/{userId}")]
-        public async Task<ActionResult<ServiceResponse<List<GetPostDto>>>> Get(string userId) {
-            return Ok(await _postService.GetByUser(userId));
-        }
-
         [HttpGet("{id}")]
         public async Task<ActionResult<ServiceResponse<GetPostDto>>> GetSingle(int id) {
 
             return Ok(await _postService.GetPostById(id));
-        }
-
-        [HttpGet("{id}/{userId}")]
-        public async Task<ActionResult<ServiceResponse<GetPostDto>>> GetSingleByIdPerUser(int id, string userId) {
-
-            return Ok(await _postService.GetPostByIdPerUser(id, userId));
         }
 
         [HttpPost]
