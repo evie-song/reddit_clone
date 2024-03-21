@@ -9,7 +9,7 @@ using Microsoft.Extensions.Logging;
 using reddit_clone.Data;
 
 namespace reddit_clone.Controllers
-{   
+{
     [ApiController]
     [Route("api/[controller]")]
     [DisableCors]
@@ -24,15 +24,16 @@ namespace reddit_clone.Controllers
 
         [HttpGet("GetAll")]
         public async Task<ActionResult<List<Community>>> GetAllCommunity()
-        {   
+        {
             return Ok(await _context.Communities.ToListAsync());
         }
 
 
         [HttpPost]
-        public async Task<ActionResult<List<Community>>> AddCommunity (AddCommunityDto request)
-        {   
-            var newCommunity = new Community {
+        public async Task<ActionResult<List<Community>>> AddCommunity(AddCommunityDto request)
+        {
+            var newCommunity = new Community
+            {
                 Title = request.Title,
             };
 
@@ -40,5 +41,7 @@ namespace reddit_clone.Controllers
             await _context.SaveChangesAsync();
             return Ok(await _context.Communities.ToListAsync());
         }
+
+        
     }
 }
