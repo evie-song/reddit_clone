@@ -23,9 +23,9 @@ namespace reddit_clone.Services.PostService
             _userManager = userManager;
         }
 
-        public async Task<ServiceResponse<List<GetPostDto>>> AddPost(AddPostDto newPost)
+        public async Task<ServiceResponse<GetPostDto>> AddPost(AddPostDto newPost)
         {
-            var servicesResponse = new ServiceResponse<List<GetPostDto>>();
+            var servicesResponse = new ServiceResponse<GetPostDto>();
             var post = _mapper.Map<Post>(newPost);
             var community = await _context.Communities.FindAsync(newPost.CommunityId);
             var user = await _userManager.FindByIdAsync(newPost.UserId);
@@ -34,9 +34,11 @@ namespace reddit_clone.Services.PostService
             _context.Posts.Add(post);
             await _context.SaveChangesAsync();
 
-            var posts = await _context.Posts.Select(p => new GetPostDto(p)).ToListAsync();
-            servicesResponse.Data = posts.OrderBy(post => post.Id).ToList();
-            // servicesResponse.Data = _context.Posts.Select(p => _mapper.Map<GetPostDto>(p)).ToList();
+            var id = post.Id;
+
+            var dbPost = await GetSinglePostsWithRelations(id);
+
+            servicesResponse.Data = new GetPostDto(dbPost);
             return servicesResponse;
         }
 
