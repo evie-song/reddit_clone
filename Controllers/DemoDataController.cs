@@ -9,6 +9,11 @@ using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using reddit_clone.Data;
 using reddit_clone_backend.Models;
+using System;
+using System.IO;
+using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration.UserSecrets;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Infrastructure.Internal;
 
 namespace reddit_clone_backend.Controllers
 {
@@ -99,7 +104,7 @@ namespace reddit_clone_backend.Controllers
                     }
 
                 }
-                return Ok(new { NewCommunities = addedCommunities});
+                return Ok(new { NewCommunities = addedCommunities });
             }
             catch (Exception ex)
             {
@@ -108,6 +113,96 @@ namespace reddit_clone_backend.Controllers
             }
         }
 
+        public class RedditPost
+        {
+            public string Subreddit { get; set; }
+            public string SelfText { get; set; }
+            public string Title { get; set; }
+            public string Selftext_html { get; set; }
+            public string Permalink { get; set; }
+        }
+
+
+        [HttpPost("AddPostsFromFile")]
+        public async Task<ActionResult> AddPostsFromFile()
+        {
+            var allUserIds = _context.ApplicationUsers.Select(au => au.Id).ToList();
+            var random = new Random();
+
+            try
+            {
+                var filePath = "listing_data.json";
+                var json = await System.IO.File.ReadAllTextAsync(filePath);
+                var posts = JsonConvert.DeserializeObject<List<RedditPost>>(json);
+
+                // var post = posts[0];
+
+                var newPosts = new List<Post>();
+
+                foreach (var post in posts) {
+                    var community_name = post.Subreddit;
+                    var community = await _context.Communities.FirstOrDefaultAsync(c => c.Title == community_name);
+                    int communityId;
+                    if (community == null) {
+                        communityId = 106;
+                    } else {
+                        communityId = community.Id;
+                    }
+
+                    var randomIndex = random.Next(0, allUserIds.Count);
+                    var userId = allUserIds[randomIndex];
+
+                    var newPost = new Post() {
+                        Title = post.Title,
+                        Content = post.Selftext_html,
+                        CommunityId = communityId,
+                        UserId = userId,
+                        ApplicationUserId = userId
+                    };
+
+                    newPosts.Add(newPost);
+                    
+                }
+                _context.Posts.AddRange(newPosts);
+                await _context.SaveChangesAsync();
+
+                return Ok(new {message = newPosts});
+            }
+
+            catch (Exception ex)
+            {
+                return StatusCode(500, "Error occurred while adding posts from file.");
+            }
+        }
+
+        [HttpPost("AddPostVotes")]
+        public async Task<ActionResult> AddPostVotes() {
+            var allUserIds = _context.ApplicationUsers.Select(au => au.Id).ToList();
+            var random = new Random();
+
+            var allPosts = _context.Posts.Select(p => p.Id).ToList();
+
+            foreach (var postId in allPosts) {
+                var shuffledUserIds = allUserIds.OrderBy(x => random.Next()).ToList();
+                int numberOfVotes = random.Next(0, 81);
+                var usersToVote = shuffledUserIds.Take(numberOfVotes).ToList();
+                foreach (string user in usersToVote) {
+                    int randomNumber = random.Next(0, 100);
+                    int voteValue = randomNumber < 70? 1 : -1;
+                    VoteEnum enumVoteValue = voteValue == 1 ? VoteEnum.UpVote : VoteEnum.DownVote;
+                    var voteRegistration = new VoteRegistration(){
+                        ApplicationUserId = user, 
+                        PostId = postId,
+                        VoteValue = enumVoteValue,
+                    };
+                    _context.VoteRegistrations.Add(voteRegistration);
+                }
+            }
+            await _context.SaveChangesAsync();
+
+            return Ok("Post votes added successfully.");
+
+        }
 
 
 

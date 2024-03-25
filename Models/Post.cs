@@ -22,9 +22,9 @@ namespace reddit_clone.Models
         public IdentityUser? User {get; set;}
         public string? ApplicationUserId { get; set; }
         public ApplicationUser? ApplicationUser { get;  set; }
-        public List<SavedPost> SavedPosts { get; set; }
-        public List<VoteRegistration> VoteRegistrations { get; set; }
-        public List<Comment> Comments {get; set; }
+        public List<SavedPost> SavedPosts { get; set; } = new List<SavedPost>();
+        public List<VoteRegistration> VoteRegistrations { get; set; } = new List<VoteRegistration>();
+        public List<Comment> Comments {get; set; } = new List<Comment>();
 
         public Post() {
             CreatedTime = DateTime.Now;

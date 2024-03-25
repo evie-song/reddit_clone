@@ -73,7 +73,17 @@ namespace reddit_clone.Services.PostService
             var servicesResponse = new ServiceResponse<List<GetPostDto>>();
             var posts = await GetAllPostsWithRelations();
 
-            servicesResponse.Data = posts.Select(p => new GetPostDto(p)).OrderBy(post => post.Id).ToList();
+            // servicesResponse.Data = posts.Select(p => new GetPostDto(p)).OrderBy(post => post.Id).ToList();
+
+            servicesResponse.Data = posts
+                .Select(p => new
+                {
+                    Post = p,
+                    TotalVote = p.VoteRegistrations.Sum(v => (int)v.VoteValue)
+                })
+                .OrderByDescending(x => x.TotalVote)
+                .Select(x => new GetPostDto(x.Post))
+                .ToList();
             return servicesResponse;
         }
 
