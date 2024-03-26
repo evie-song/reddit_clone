@@ -66,7 +66,7 @@ namespace reddit_clone_backend.Controllers
                 .Include(c => c.ChildComments)
                     .ThenInclude(cc => cc.CommentVoteRegistrations) 
                 .Include(c => c.CommentVoteRegistrations)
-                .Where( c => c.PostId == id)
+                .Where( c => c.PostId == id && c.BaseCommentId == null)
                 .Select(c => new GetCommentDto(c))
                 .ToListAsync();
             return Ok(comments);
