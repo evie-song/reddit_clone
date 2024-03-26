@@ -21,9 +21,9 @@ namespace reddit_clone.Controllers
             _postService = postService;
         }
         
-        [HttpGet("GetAll")]
-        public async Task<ActionResult<ServiceResponse<List<GetPostDto>>>> Get() {
-            return Ok(await _postService.GetAllPost());
+        [HttpGet("GetAll/{page}")]
+        public async Task<ActionResult<ServiceResponse<List<GetPostDto>>>> Get(int page) {
+            return Ok(await _postService.GetAllPost(page, 20));
         }
 
         [HttpGet("{id}")]

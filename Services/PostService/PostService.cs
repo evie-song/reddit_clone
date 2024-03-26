@@ -68,22 +68,37 @@ namespace reddit_clone.Services.PostService
             return servicesResponse;
         }
 
-        public async Task<ServiceResponse<List<GetPostDto>>> GetAllPost()
+        public async Task<ServiceResponse<List<GetPostDto>>> GetAllPost(int page = 1, int take = 20)
         {
             var servicesResponse = new ServiceResponse<List<GetPostDto>>();
-            var posts = await GetAllPostsWithRelations();
+            // var posts = await GetAllPostsWithRelations();
 
             // servicesResponse.Data = posts.Select(p => new GetPostDto(p)).OrderBy(post => post.Id).ToList();
 
-            servicesResponse.Data = posts
-                .Select(p => new
+            // servicesResponse.Data = posts
+            //     .Select(p => new GetPostDto(p))
+            //     .ToList();
+            var skip = (page - 1) * take;
+            servicesResponse.Data = await _context.Posts
+                .Include(p => p.Community)
+                .Include(p => p.Comments)
+                .Include(p => p.VoteRegistrations)
+                .Select(p => new GetPostDto
                 {
-                    Post = p,
-                    TotalVote = p.VoteRegistrations.Sum(v => (int)v.VoteValue)
+                    Id = p.Id,
+                    Title = p.Title,
+                    Content = p.Content,
+                    CreatedTime = p.CreatedTime,
+                    CommunityId = p.CommunityId,
+                    CommunityName = p.Community.Title, // Assuming Community is not null
+                    Username = p.ApplicationUser.Username, // Assuming User is not null
+                    CommentCount = p.Comments.Count(),
+                    TotalVote = p.VoteRegistrations.Sum(vr => vr.VoteValue == VoteEnum.UpVote ? 1 : -1),
                 })
-                .OrderByDescending(x => x.TotalVote)
-                .Select(x => new GetPostDto(x.Post))
-                .ToList();
+                .OrderByDescending(dto => dto.TotalVote)
+                .Skip(skip)
+                .Take(take)
+                .ToListAsync();
             return servicesResponse;
         }
 
@@ -94,6 +109,7 @@ namespace reddit_clone.Services.PostService
             servicesResponse.Data = new GetPostDto(
                 dbPost
             );
+
             return servicesResponse;
         }
 
@@ -110,6 +126,7 @@ namespace reddit_clone.Services.PostService
                 .Include(p => p.Comments)
                     .ThenInclude(c => c.ApplicationUser)
                 .Include(p => p.VoteRegistrations)
+                .OrderByDescending(p => p.VoteRegistrations.Sum(v => v.VoteValue == VoteEnum.UpVote ? 1 : -1))
                 .ToListAsync();
         }
 

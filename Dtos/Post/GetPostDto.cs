@@ -12,15 +12,11 @@ namespace reddit_clone.Dtos.Post
     public class GetPostDto
     {
 
-        public int Id { get; private set; }
+        public int Id { get; set; }
         public string? Title { get; set; }
         public string? Content { get; set; }
-        public DateTime CreatedTime { get; private set; }
+        public DateTime CreatedTime { get; set; }
         public int TotalVote {get; set; } = 0;
-        public bool UpVoted { get; set; } = false;
-        public bool DownVoted { get; set; } = false;
-        public int? UpVote { get; set; }
-        public int? DownVote { get; set; }
         public int? CommunityId { get; set; }
         public string? CommunityName { get; set; }
         public string? Username { get; set; }
@@ -35,14 +31,10 @@ namespace reddit_clone.Dtos.Post
             Title = post.Title;
             Content = post.Content;
             CreatedTime = post.CreatedTime;
-            UpVote = post.VoteRegistrations.Where(vr => vr.VoteValue == VoteEnum.UpVote).Count();
-            DownVote = post.VoteRegistrations.Where(vr => vr.VoteValue == VoteEnum.DownVote).Count();
             CommunityId = post.CommunityId;
             CommunityName = post.Community != null ? post.Community.Title : "not found";
             Username = post.User != null ? post.User.UserName : "not found";
             IsSaved = isSaved;
-            UpVoted = post.VoteRegistrations.Any(vr => vr.PostId == post.Id && vr.ApplicationUserId == userId && vr.VoteValue == VoteEnum.UpVote);
-            DownVoted = post.VoteRegistrations.Any(vr => vr.PostId == post.Id && vr.ApplicationUserId == userId && vr.VoteValue == VoteEnum.DownVote);
             CommentCount = post.Comments.Count();
             TotalVote = post.TotalVoteCount;
         }
@@ -57,8 +49,6 @@ namespace reddit_clone.Dtos.Post
             CommunityName = post.Community != null ? post.Community.Title : "not found";
             Username = post.User != null ? post.User.UserName : "not found";
             CommentCount = post.Comments.Count();
-            UpVote = post.VoteRegistrations.Where(vr => vr.VoteValue == VoteEnum.UpVote).Count();
-            DownVote = post.VoteRegistrations.Where(vr => vr.VoteValue == VoteEnum.DownVote).Count();
             TotalVote = post.TotalVoteCount;
         }
 
