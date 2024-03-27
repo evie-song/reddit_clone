@@ -15,6 +15,7 @@ namespace reddit_clone_backend.Dtos.Comment
         public int? BaseCommentId { get; set; }
         public int TotalVoteCount { get; set; } 
         public ICollection<GetCommentDto>? ChildComments { get; set; }
+        public int EngagementScore { get; set; }
 
         public GetCommentDto(Models.Comment comment) {
             Id = comment.Id;
@@ -25,6 +26,7 @@ namespace reddit_clone_backend.Dtos.Comment
             BaseCommentId = comment.BaseCommentId;
             TotalVoteCount = comment.TotalVoteCount;
             ChildComments = comment.ChildComments.Select(c => new GetCommentDto(c)).ToList();
+            EngagementScore = comment.EngagementScore;
             // ChildComments = comment.ChildComments != null ? comment.ChildComments.Select(c => new GetCommentDto(c)).ToList() : new List<GetCommentDto>();
         }
         public GetCommentDto() {

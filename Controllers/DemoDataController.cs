@@ -180,7 +180,7 @@ namespace reddit_clone_backend.Controllers
             var allUserIds = _context.ApplicationUsers.Select(au => au.Id).ToList();
             var random = new Random();
 
-            var allPosts = _context.Posts.Select(p => p.Id).ToList();
+            var allPosts = _context.Posts.Where(p => p.Id > 443).Select(p => p.Id).ToList();
 
             foreach (var postId in allPosts) {
                 var shuffledUserIds = allUserIds.OrderBy(x => random.Next()).ToList();
@@ -188,7 +188,7 @@ namespace reddit_clone_backend.Controllers
                 var usersToVote = shuffledUserIds.Take(numberOfVotes).ToList();
                 foreach (string user in usersToVote) {
                     int randomNumber = random.Next(0, 100);
-                    int voteValue = randomNumber < 70? 1 : -1;
+                    int voteValue = randomNumber < 90? 1 : -1;
                     VoteEnum enumVoteValue = voteValue == 1 ? VoteEnum.UpVote : VoteEnum.DownVote;
                     var voteRegistration = new VoteRegistration(){
                         ApplicationUserId = user, 

@@ -21,6 +21,7 @@ namespace reddit_clone_backend.Models
         public DateTime CreatedAt { get; set; }
         public DateTime? LastModifiedAt { get; set; }
         public ICollection<CommentVoteRegistration> CommentVoteRegistrations { get; set; }
+        public int EngagementScore { get; set; }
 
         public Comment() {
             ChildComments = new List<Comment>();
