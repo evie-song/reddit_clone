@@ -15,6 +15,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration.UserSecrets;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Infrastructure.Internal;
 using Bogus;
+using System.Runtime.InteropServices;
 
 
 namespace reddit_clone_backend.Controllers
@@ -206,26 +207,30 @@ namespace reddit_clone_backend.Controllers
 
         }
 
-        [HttpPost("AddCommentVotes/{count}")]
-        public async Task<IActionResult> AddCommentVotes(int count) {
+        [HttpPost("AddCommentVotes/{max_comment_id}/{max_vote_per_user}")]
+        public async Task<IActionResult> AddCommentVotes(int max_comment_id, int max_vote_per_user) {
             var random = new Random();
             var userIds = _context.ApplicationUsers.Select(au => au.Id).ToList();
-            var commentIds = _context.Comments.Select(c => c.Id ).ToList();
+            var commentIds = _context.Comments.Where(c => c.Id < max_comment_id).Select(c => c.Id ).ToList();
 
             foreach ( var userId in userIds) {
                 var shuffledCommentIds = commentIds.OrderBy(x => random.Next()).ToList();
-                int numberOfVotes = random.Next(0, 100);
+                int numberOfVotes = random.Next(0, max_vote_per_user);
                 var commentsToVote = shuffledCommentIds.Take(numberOfVotes).ToList();
                 foreach (int commentId in commentsToVote) {
                     int randomNumber = random.Next(0, 100);
                     int voteValue = randomNumber < 90? 1 : -1;
                     VoteEnum enumVoteValue = voteValue == 1 ? VoteEnum.UpVote : VoteEnum.DownVote;
-                    var commentVote = new CommentVoteRegistration() {
-                        ApplicationUserId = userId,
-                        CommentId = commentId,
-                        VoteValue = enumVoteValue,
-                    };
-                    _context.CommentVoteRegistrations.Add(commentVote);
+                    var exist_vote = _context.CommentVoteRegistrations.FirstOrDefault(cv => cv.ApplicationUserId == userId && cv.CommentId == commentId );
+                    if (exist_vote == null) {
+                        var commentVote = new CommentVoteRegistration() {
+                            ApplicationUserId = userId,
+                            CommentId = commentId,
+                            VoteValue = enumVoteValue,
+                        };
+                        _context.CommentVoteRegistrations.Add(commentVote);
+                    }
+                    
                 }
             }
             await _context.SaveChangesAsync();
@@ -252,8 +257,10 @@ namespace reddit_clone_backend.Controllers
                 
                 Comment newComment;
                 if (isChildComment) {
-                    newComment = new Comment(){
-                    PostId = randomPostId,
+                    var baseComment = _context.Comments.FirstOrDefault(c => c.Id == randomBaseCommentId);
+                    var baseCommentPostId = baseComment.PostId;
+                    newComment = new Comment(){ 
+                    PostId = baseCommentPostId,
                     Content = randomText,
                     ApplicationUserId = randomUserId,
                     BaseCommentId = randomBaseCommentId
