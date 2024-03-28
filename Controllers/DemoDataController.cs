@@ -206,6 +206,35 @@ namespace reddit_clone_backend.Controllers
 
         }
 
+        [HttpPost("AddCommentVotes/{count}")]
+        public async Task<IActionResult> AddCommentVotes(int count) {
+            var random = new Random();
+            var userIds = _context.ApplicationUsers.Select(au => au.Id).ToList();
+            var commentIds = _context.Comments.Select(c => c.Id ).ToList();
+
+            foreach ( var userId in userIds) {
+                var shuffledCommentIds = commentIds.OrderBy(x => random.Next()).ToList();
+                int numberOfVotes = random.Next(0, 100);
+                var commentsToVote = shuffledCommentIds.Take(numberOfVotes).ToList();
+                foreach (int commentId in commentsToVote) {
+                    int randomNumber = random.Next(0, 100);
+                    int voteValue = randomNumber < 90? 1 : -1;
+                    VoteEnum enumVoteValue = voteValue == 1 ? VoteEnum.UpVote : VoteEnum.DownVote;
+                    var commentVote = new CommentVoteRegistration() {
+                        ApplicationUserId = userId,
+                        CommentId = commentId,
+                        VoteValue = enumVoteValue,
+                    };
+                    _context.CommentVoteRegistrations.Add(commentVote);
+                }
+            }
+            await _context.SaveChangesAsync();
+
+            return Ok("Comment votes added successfully.");
+
+        }
+
+
         [HttpPost("AddBaseComments/{count}/{isChildComment}")]
         public async Task<IActionResult> AddComments(int count, bool isChildComment = false ) {
             var random = new Random();
