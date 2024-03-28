@@ -14,6 +14,8 @@ using System.IO;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration.UserSecrets;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Infrastructure.Internal;
+using Bogus;
+
 
 namespace reddit_clone_backend.Controllers
 {
@@ -204,6 +206,45 @@ namespace reddit_clone_backend.Controllers
 
         }
 
+        [HttpPost("AddBaseComments/{count}/{isChildComment}")]
+        public async Task<IActionResult> AddComments(int count, bool isChildComment = false ) {
+            var random = new Random();
+            var postIds = _context.Posts.Select(p => p.Id).ToList();
+            var userIds = _context.ApplicationUsers.Select(au => au.Id).ToList();
+            var commentIds = _context.Comments.Select(c => c.Id ).ToList();
+
+            for (int i = 0; i < count; i++ ) {
+                var randomPostId = postIds[random.Next(postIds.Count)];
+                var randomUserId = userIds[random.Next(userIds.Count)];
+                var randomBaseCommentId = isChildComment ? commentIds[random.Next(commentIds.Count)] : 0 ;
+
+                var lorem = new Bogus.DataSets.Lorem();
+                string randomText = lorem.Paragraph(); // Generates a random Lorem Ipsum paragraph
+                
+                Comment newComment;
+                if (isChildComment) {
+                    newComment = new Comment(){
+                    PostId = randomPostId,
+                    Content = randomText,
+                    ApplicationUserId = randomUserId,
+                    BaseCommentId = randomBaseCommentId
+                }; }
+                else {
+                    newComment = new Comment(){
+                    PostId = randomPostId,
+                    Content = randomText,
+                    ApplicationUserId = randomUserId,
+                    };
+                }
+
+                _context.Comments.Add(newComment);
+            }
+
+            await _context.SaveChangesAsync();
+
+            return Ok("Comments added successfully.");
+
+        }
 
 
         private string GenerateRandomEmail()

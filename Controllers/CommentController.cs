@@ -39,6 +39,8 @@ namespace reddit_clone_backend.Controllers
                 .Include(c => c.ApplicationUser)
                 .Include(c => c.ChildComments)
                     .ThenInclude(cc => cc.CommentVoteRegistrations)
+                .Include(c => c.ChildComments)
+                    .ThenInclude(cc => cc.ApplicationUser)
                 .Include(c => c.CommentVoteRegistrations)
                 .SingleOrDefaultAsync(c => c.Id == newComment.Id);
 
@@ -53,6 +55,8 @@ namespace reddit_clone_backend.Controllers
                 .Include(c => c.ApplicationUser)
                 .Include(c => c.ChildComments)
                     .ThenInclude(cc => cc.CommentVoteRegistrations) 
+                .Include(c => c.ChildComments)
+                    .ThenInclude(cc => cc.ApplicationUser)
                 .Include(c => c.CommentVoteRegistrations)
                 .Select(c => new GetCommentDto(c))
                 .ToListAsync();
@@ -65,11 +69,17 @@ namespace reddit_clone_backend.Controllers
                 .Include(c => c.ApplicationUser)
                 .Include(c => c.ChildComments)
                     .ThenInclude(cc => cc.CommentVoteRegistrations) 
+                .Include(c => c.ChildComments)
+                    .ThenInclude(cc => cc.ApplicationUser)
                 .Include(c => c.CommentVoteRegistrations)
-                .Where( c => c.PostId == id && c.BaseCommentId == null)
-                .Select(c => new GetCommentDto(c))
+                .Where( c => c.PostId == id && c.BaseCommentId == null)        
                 .ToListAsync();
-            return Ok(comments);
+
+            comments = comments.OrderByDescending(c => c.TotalVoteCount).ThenByDescending(c => c.CreatedAt).ToList();
+            comments = comments.OrderByDescending(c => c.TotalVoteCount).ToList();
+
+            var commentDtos = comments.Select(c => new GetCommentDto(c)).ToList();
+            return Ok(commentDtos);
         }
 
         // public IActionResult Index()
